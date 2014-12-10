@@ -1,0 +1,6 @@
+# Example configuration file for the Brisera application
+# Copy and paste this into a file named "brisera.yaml" and add your
+# settings
+
+debug: true
+testing: false

@@ -7,7 +7,7 @@ except ImportError:
     raise ImportError("Could not import \"setuptools\". Please install the setuptools package.")
 
 
-packages = find_packages(where=".", exclude=('tests', 'apps', 'docs', 'fixtures', 'venv'))
+packages = find_packages(where=".", exclude=('tests', 'apps', 'docs', 'fixtures', 'conf', 'venv'))
 
 requires = []
 
