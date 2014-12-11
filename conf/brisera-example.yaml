@@ -1,6 +1,23 @@
 # Example configuration file for the Brisera application
 # Copy and paste this into a file named "brisera.yaml" and add your
-# settings
+# settings the defaults are configured to the CloudBurst sample.
 
-debug: true
-testing: false
+debug: true         # the app will print or log debug statements
+testing: false      # the app will not overwrite important resources
+
+# the bp overlap to carry over in sequences
+# (ensure this is longer than longest read)
+overlap: 1024
+max_chunk: 65535 # the maximum length of a chunk in the mapping
+
+min_read_len: 36 # the minimum length of the reads
+max_read_len: 36 # the maximum length of the reads
+
+
+k: 3               # number of mismatches to allow (bigger means more time)
+allow_diff: false  # False is mismatches only, True indels as well
+fliter_align: true # False uses all alignments, True only report unambiguous best alignment
+
+
+block_size: 128    # number of qry and ref tuples to consider at a time in the reduce phase
+redundancy: 16     # number of copies of low complexity seeds to use

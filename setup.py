@@ -37,7 +37,7 @@ config = {
     "install_requires": requires,
     "classifiers": classifiers,
     "zip_safe": False,
-    "scripts": [],
+    "scripts": ["apps/convert_fasta.py"],
 }
 
 setup(**config)
