@@ -2,6 +2,8 @@
 Handles the conversion of a FASTA sequence into a sequence format
 """
 
+import cPickle
+
 from brisera.utils import fasta
 from brisera.config import settings
 
@@ -50,18 +52,15 @@ class FastaChunker(object):
             else:
                 offset = end - settings.overlap
 
-    def convert(self, writer):
+    def convert(self):
         """
-        The main entry point, convert the FASTA file and output it by
-        writing it to the given stream (the writer).
+        The main entry point, convert the FASTA file and yielding pairs
+        where the key is the index and the value is the record.
         """
 
         for idx, seq in self:
-            for chunk in self.chunk(seq):
-                record = str((idx, chunk))
-                writer.write(record+"\n")
-                break
-            break
+            for record in self.chunk(seq):
+                yield (idx, cPickle.dumps(record, cPickle.HIGHEST_PROTOCOL))
 
     def __iter__(self):
         """
