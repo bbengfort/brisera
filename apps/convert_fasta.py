@@ -10,6 +10,7 @@ format that can quickly be read with Spark into an RDD.
 import os
 import sys
 import shutil
+import brisera
 import tempfile
 
 from brisera.convert import FastaChunker
@@ -48,3 +49,8 @@ if __name__ == "__main__":
     shutil.rmtree(tempdir)
 
     assert not os.path.exists(tempdir)
+
+    print "Processed %i sequences into %i chunks" % (chunker.sequences, chunker.chunks)
+    print "Minimum sequence length: %i" % chunker.min_sequence_len
+    print "Maximum sequence length: %i" % chunker.max_sequence_len
+    print "Saved as Brisera version %s sequence format" % brisera.__version__

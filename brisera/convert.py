@@ -14,6 +14,7 @@ class FastaChunker(object):
         self.min_sequence_len = None
         self.max_sequence_len = None
         self.sequences = 0
+        self.chunks    = 0
 
     def chunk(self, sequence):
         """
@@ -45,6 +46,7 @@ class FastaChunker(object):
             end = min(offset+settings.max_chunk, length)
 
             chunk = sequence[offset:end]
+            self.chunks += 1
             yield (chunk, offset, end == length)
 
             if end == length:
