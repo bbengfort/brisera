@@ -44,7 +44,7 @@ class BriseraConfiguration(confire.Configuration):
     max_read_len = 36
     k            = 3
     allow_diff   = False
-    filter_align = True
+    filter_align = False
     block_size   = 128
     redundancy   = 16
 

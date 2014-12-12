@@ -14,11 +14,20 @@ alignments than Hadoop and Cloudburst.
 ##########################################################################
 
 import sys
+import csv
 import brisera
+import StringIO
 
 from brisera.utils import timeit
 from brisera.config import settings
 from pyspark import SparkConf, SparkContext
+
+def write_records(records):
+    output = StringIO.StringIO()
+    writer = csv.writer(output)
+    for record in records:
+        writer.writerow(record)
+    return [output.getvalue()]
 
 @timeit
 def run_brisera_alignment(sc, refpath, qrypath, outpath):
@@ -35,7 +44,7 @@ def run_brisera_alignment(sc, refpath, qrypath, outpath):
         fdelta = 0
 
     # Write alignments to disk
-    alignments.saveAsTextFile(outpath)
+    alignments.mapPartitions(write_records).saveAsTextFile(outpath)
 
     return alignments, adelta, fdelta
 
@@ -64,4 +73,4 @@ if __name__ == "__main__":
     alignments, adelta, fdelta = result
     print "Total execution time: %0.3f seconds" % delta
     print "    Alignment time: %0.3f seconds" % adelta
-    print "    Filtering time: %0.3f seconds" % fdelta
+    # print "    Filtering time: %0.3f seconds" % fdelta

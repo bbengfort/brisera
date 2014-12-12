@@ -14,9 +14,9 @@ min_read_len: 36 # the minimum length of the reads
 max_read_len: 36 # the maximum length of the reads
 
 
-k: 3               # number of mismatches to allow (bigger means more time)
-allow_diff: false  # False is mismatches only, True indels as well
-fliter_align: true # False uses all alignments, True only report unambiguous best alignment
+k: 3                # number of mismatches to allow (bigger means more time)
+allow_diff: false   # False is mismatches only, True indels as well
+fliter_align: false # False uses all alignments, True only report unambiguous best alignment
 
 
 block_size: 128    # number of qry and ref tuples to consider at a time in the reduce phase

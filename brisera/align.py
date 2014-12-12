@@ -6,6 +6,7 @@ Implements MerReduce alignment (seed-and-reduce) in a distributed fashion
 ## Imports
 ##########################################################################
 
+from brisera.lv import *
 from brisera.utils import *
 from brisera.records import *
 from brisera.config import settings
@@ -91,9 +92,9 @@ class MerAlignment(object):
             if self.redundancy > 1 and repseed(sequence, start, self.seed_len):
                 for rdx in xrange(self.redundancy):
                     r   = rdx % self.redundancy
-                    yield (seed, (key, offset, is_last, leftstart, leftlen, rightstart, rightlen, r))
+                    yield (seed, (key, offset, is_last, sequence[leftstart:leftlen], sequence[rightstart:rightlen], r))
             else:
-                yield (seed, (key, offset, is_last, leftstart, leftlen, rightstart, rightlen, 0))
+                yield (seed, (key, offset, is_last, sequence[leftstart:leftlen], sequence[rightstart:rightlen], 0))
 
     def map_queries(self, arg):
         """
@@ -135,9 +136,43 @@ class MerAlignment(object):
 
                 if self.redundancy > 1 and repseed(sequence, idx, self.seed_len):
                     r = key % self.redundancy
-                    yield (seed, (key, idx, is_last, 0, idx, rightstart, rightlen, r))
+                    yield (seed, (key, idx, is_last, sequence[0:idx], sequence[rightstart:rightlen], r))
                 else:
-                    yield (seed, (key, idx, is_last, 0, idx, rightstart, rightlen, 0))
+                    yield (seed, (key, idx, is_last, sequence[0:idx], sequence[rightstart:rightlen], 0))
+
+    def extend(self, arg):
+        """
+        Performs the extend portion of the BLAST algorithm.
+        """
+        key, (query, reference) = arg
+        refstart    = reference[1]
+        refend      = refstart + self.seed_len
+        differences = 0
+
+        try:
+            # Align left flanks
+            if len(query[3]) != 0:
+                a = LandauVishkin().kdifference(reference[3], query[3], self.k)
+                if a[0] == -1:
+                    return NO_ALIGNMENT
+                if not is_bazea_yates_seed(a, len(query[3]), self.seed_len):
+                    return NO_ALIGNMENT
+
+                refstart -= a[0]
+                differences = a[1]
+
+            # Align right flanks
+            if len(query[4]) != 0:
+                b = LandauVishkin.kdifference(reference[4], query[4], self.k-differences)
+                if a[0] == -1:
+                    return NO_ALIGNMENT
+
+                refend += b[0]
+                differences += b[1]
+
+            return reference[0], refstart, refend, differences
+        except:
+            return NO_ALIGNMENT
 
 ##########################################################################
 ## Spark Functionality
@@ -148,13 +183,21 @@ def align_all(sc, refpath, qrypath):
     """
     Returns an RDD of alignments (no writes to disk)
     """
-    reference = sc.sequenceFile(refpath)
-    queries   = sc.sequenceFile(qrypath)
-    alignment = MerAlignment()
+    reference  = sc.sequenceFile(refpath)
+    queries    = sc.sequenceFile(qrypath)
+    alignment  = MerAlignment()
 
     # Perform mapping
-    reference = reference.flatMap(alignment.map_reference)
-    return reference
+    reference  = reference.flatMap(alignment.map_reference)
+    queries    = queries.flatMap(alignment.map_queries)
+
+    # Find shared seeds
+    shared     = queries.join(reference)
+
+    # Compute alignments with Landau-Viskin
+    alignments = shared.map(alignment.extend).filter(lambda a: a != NO_ALIGNMENT )
+
+    return alignments
 
 if __name__ == '__main__':
     from brisera.convert import *
