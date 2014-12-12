@@ -2,6 +2,16 @@
 Utilities to help create and serialize records in binary format
 """
 
+##########################################################################
+## Imports
+##########################################################################
+
+import cPickle
+
+##########################################################################
+## Module Constants
+##########################################################################
+
 DNA_BYTES = {
     'A': 0x00,
     'C': 0x01,
@@ -13,6 +23,10 @@ DNA_BYTES = {
 }
 
 BYTES_DNA = dict((v, k) for (k,v) in DNA_BYTES.items())
+
+##########################################################################
+## Helper functions
+##########################################################################
 
 def dna_from_seq(dna, pos, length):
     if length == 0:
@@ -46,6 +60,13 @@ def dna_from_seq(dna, pos, length):
 
     return string
 
+def repseed(seq, start, slen):
+    first = seq[start]
+    for idx in xrange(slen):
+        if seq[idx+start] != first:
+            return False
+    return True
+
 def record_from_bytes(raw):
 
     last_chunk = raw[0] == 1
@@ -58,6 +79,19 @@ def record_from_bytes(raw):
     sequence = dna_from_seq(raw, 5, len(raw)-5)
 
     return sequence, offset, last_chunk
+
+def serialize_record(record):
+    """
+    Convert a tuple into a binary string for use with SequenceFiles
+    """
+    return cPickle.dumps(record, 0)
+
+def deserialize_record(record):
+    """
+    Read a binary record object and return the tuple
+    """
+    record = record.encode('utf-8')
+    return cPickle.loads(record)
 
 if __name__ == '__main__':
     value = bytearray(b'\x01\x00\x00\x00\x00!\x14$AD@\x10B\x04DD"A@$$\x04"')

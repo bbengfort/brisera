@@ -26,3 +26,8 @@ test:
 # Targets for installation
 install:
 	$(PYTHON_BIN)/python setup.py install
+
+# Targets for running fixture
+runfixture:
+	rm -rf fixtures/output
+	-spark-submit $(CURDIR)/apps/brisera_align.py $(CURDIR)/fixtures/s_suis.ser $(CURDIR)/fixtures/100k.ser $(CURDIR)/fixtures/output

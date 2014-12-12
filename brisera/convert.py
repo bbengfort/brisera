@@ -2,10 +2,19 @@
 Handles the conversion of a FASTA sequence into a sequence format
 """
 
+##########################################################################
+## Imports
+##########################################################################
+
 import cPickle
 
 from brisera.utils import fasta
 from brisera.config import settings
+from brisera.records import serialize_record
+
+##########################################################################
+## Chunker for RDDs
+##########################################################################
 
 class FastaChunker(object):
 
@@ -62,7 +71,7 @@ class FastaChunker(object):
 
         for idx, seq in self:
             for record in self.chunk(seq):
-                yield (idx, cPickle.dumps(record, cPickle.HIGHEST_PROTOCOL))
+                yield (idx, serialize_record(record))
 
     def __iter__(self):
         """

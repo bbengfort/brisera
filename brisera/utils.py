@@ -7,6 +7,7 @@ Utility functions for Brisera
 ##########################################################################
 
 import os
+import time
 
 ##########################################################################
 ## Module Constants
@@ -44,3 +45,35 @@ def fasta(path):
 
         if label and sequence:
             yield (label, sequence)
+
+def timeit(func):
+    """
+    Wrapper function for timing function calls
+    """
+    def wrapper(*args, **kwargs):
+        start  = time.time()
+        result = func(*args, **kwargs)
+        finit  = time.time()
+        delta  = finit-start
+        return result, delta
+    return wrapper
+
+def revc(sequence):
+    """
+    Returns the complement of the DNA sequence
+    """
+    complements = {
+        'A': 'T',
+        'T': 'A',
+        'C': 'G',
+        'G': 'C',
+        'N': 'N',
+        '.': '.',
+    }
+
+    def inner(sequence):
+        for char in reversed(sequence):
+            yield complements[char]
+
+    sequence = sequence.upper()
+    return ''.join(inner(sequence))
