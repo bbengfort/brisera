@@ -33,6 +33,24 @@ To read a burst sequence file (e.g. `fixtures/cloudburst/100k.br`) in order to c
 
 This will write out each record (or chunk) from the sequence file to a text file on disk.
 
+To convert a FASTA file for use with Brisera alignments, you can use the `convert_fasta.py` Spark application as follows:
+
+    $ spark-submit --master local[*] apps/convert_fasta.py input.fa output.ser
+
+This command will transform a single FASTA file into a chunked, binary format that can be used with Spark in a computationally efficient way (preparing the chunks for seed reduce).
+
+To compute alignments, use the `brisera_align.py` Spark application. Note that this application takes its configuration from the `conf/brisera.yaml` file, an example of which is included. You can modify the configuration for the app by modifying that file. Run the alignment as follows:
+
+    $ spark-submit --master local[*] apps/brisera_align.py refpath qrypath outpath
+
+The input is as follows:
+
+- The `refpath` is the converted FASTA file of the reference genome you wish to align to
+- The `qrypath` is the set of queries or reads that you would like aligned to the reference
+- The `outpath` is where the alignment information will be written to when complete
+
+Depending on the value you set for K, this could take seconds to hours; be aware of how modifying the settings can change things!
+
 Other Details
 -------------
 
